@@ -1,0 +1,125 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Cloudformation Template to create VPC with 2 public subnets, 2 private subnets, internet-gateway and route tables
+ 
+Resources:
+  EffulgenceTechVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+       - Key: Name
+         Value: production
+  
+  EffulgencepubSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: EffulgenceTechVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: "us-east-1a"
+      Tags:
+      - Key: Name
+        Value: production
+  
+  EffulgencepubSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: EffulgenceTechVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: "us-east-1a"
+      Tags:
+      - Key: Name
+        Value: production
+  
+  EffulgenceprivSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: EffulgenceTechVPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: "us-east-1a"
+      Tags:
+      - Key: Name
+        Value: production
+  
+  EffulgenceprivSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:  EffulgenceTechVPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: "us-east-1a"
+      Tags:
+      - Key: Name
+        Value: production
+  
+  EffulgenceTechIGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: production                                
+  
+  EffulgenceIGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: EffulgenceTechVPC
+      InternetGatewayId:
+        Ref: EffulgenceTechIGW
+  
+  Effulgencepub1SNRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: EffulgenceTechVPC
+      Tags:
+      - Key: Name
+        Value: production
+  
+  Effulgencepub2SNRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: EffulgenceTechVPC
+      Tags:
+      - Key: Name
+        Value: production
+
+  Effulgencepriv1SNRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: EffulgenceTechVPC
+      Tags:
+      - Key: Name
+        Value: production
+  
+  Effulgencepriv2SNRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: EffulgenceTechVPC
+      Tags:
+      - Key: Name
+        Value: production
+
+  PublicRoute1:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayToInternet
+    Properties:
+       RouteTableId:
+         Ref: Effulgencepub1SNRT
+       DestinationCidrBlock: 0.0.0.0/0
+       GatewayId:
+         Ref: EffulgenceTechIGW
+
+PublicRoute2:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayToInternet
+    Properties:
+       RouteTableId:
+         Ref: Effulgencepub2SNRT
+       DestinationCidrBlock: 0.0.0.0/0
+       GatewayId:
+         Ref: EffulgenceTechIGW
