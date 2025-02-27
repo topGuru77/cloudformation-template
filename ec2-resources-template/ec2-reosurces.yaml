@@ -1,0 +1,137 @@
+Parameters:
+  VpcId:
+    Description: VPC ID
+    Type: AWS::EC2::VPC::Id
+    Default: Project1VPC
+  EC2InstanceType:
+    Description: EC2 Instance Type
+    Type: String
+    Default: t2.micro
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: Pekay-keys
+  ImageId:
+    Description: Image ID
+    Type: AWS::EC2::Image::Id
+    Default: ami-02a53b0d62d37a757
+  Pub1SubnetId:
+    Description: Subnet ID
+    Type: AWS::EC2::Subnet::Id
+    Default: PubSubnet1
+  Pub2SubnetId:
+    Description: Subnet ID
+    Type: AWS::EC2::Subnet::Id
+    Default: PubSubnet2
+  Priv1SubnetId:
+    Description: Subnet ID
+    Type: AWS::EC2::Subnet::Id
+    Default: PrivSubnet1
+  Priv2SubnetId:
+    Description: Subnet ID
+    Type: AWS::EC2::Subnet::Id
+    Default: PrivSubnet2   
+  Webserver security group:
+    Description: Security Group ID
+    Type: AWS::EC2::SecurityGroup::Id
+    Default:     
+
+Resources:
+  WebserverEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref EC2InstanceType
+      KeyName: !Ref KeyName
+      ImageId: !Ref ImageId
+      SubnetId: !Ref Pub1SubnetId
+      Tags:
+        - Key: Name
+          Value: WebserverEC2
+        - Key: Stack
+          Value: production
+      SecurityGroupIds:
+       -!ImportValue WebServerSecurityGroup
+  
+  AppserverEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref EC2InstanceType
+      KeyName: !Ref KeyName
+      ImageId: !Ref ImageId
+      SubnetId: !Ref Priv1SubnetId
+      Tags:
+        - Key: Name
+          Value: AppserverEC2
+        - Key: Stack
+          Value: production
+      SecurityGroupIds:
+       -!ImportValue AppServerSecurityGroup
+  
+  Application Load Balancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: Application Load Balancer
+      Subnets:
+        - !Ref Pub1SubnetId
+        - !Ref Pub2SubnetId
+      SecurityGroups:
+        - !ImportValue WebServerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: ApplicationLB
+        - Key: Stack
+          Value: production
+  
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: TargetGroup
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VpcId
+      TargetType: instance
+      Tags:
+        - Key: Name
+          Value: TargetGroup
+        - Key: Stack
+          Value: production
+  
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+      LoadBalancerArn: !Ref Application Load Balancer
+      Port: 80
+      Protocol: HTTP 
+  
+  Outputs:
+    WebserverEC2:
+      Description: Webserver EC2 Instance ID
+      Value: !Ref WebserverEC2
+      Export:
+        Name: !Sub "${AWS::StackName}-WebserverEC2"
+    
+    AppserverEC2:
+      Description: Appserver EC2 Instance ID
+      Value: !Ref AppserverEC2
+      Export:
+        Name: !Sub "${AWS::StackName}-AppserverEC2"
+    
+    Application Load Balancer:
+      Description: Application Load Balancer ID
+      Value: !Ref Application Load Balancer
+      Export:
+        Name: !Sub "${AWS::StackName}-ApplicationLoadBalancer"
+    
+    LoadBalancerDNSName:
+      Description: Application Load Balancer DNS Name
+      Value: !GetAtt Application Load Balancer.DNSName
+      Export:
+        Name: !Sub "${AWS::StackName}-ApplicationLoadBalancerDNSName"              
+
+
+
+
+        
