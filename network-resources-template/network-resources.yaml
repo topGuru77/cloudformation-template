@@ -179,7 +179,7 @@ Resources:
       SubnetId: !Ref PrivSubnet2
       RouteTableId: !Ref PrivateRouteTable
 
-  # Security Groups (added missing security groups)
+  # Security Groups 
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
