@@ -1,125 +1,260 @@
-AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: '2010-09-09'
 
 Description: Cloudformation Template to create VPC with 2 public subnets, 2 private subnets, internet-gateway and route tables
- 
+
+Parameters:
+  VpcCIDR:
+    Description: CIDR for the VPC
+    Type: String
+    Default: "10.0.0.0/16"
+
+  PublicSubnet1CIDR:
+    Description: CIDR for the Public Subnet 1
+    Type: String
+    Default: 10.0.1.0/24
+
+
+  PublicSubnet2CIDR:
+    Description: CIDR for the Public Subnet 2
+    Type: String
+    Default: 10.0.2.0/24
+
+  PrivateSubnet1CIDR:
+    Description: CIDR for the Private Subnet 1
+    Type: String
+    Default: 10.0.3.0/24
+
+  PrivateSubnet2CIDR:
+    Description: CIDR for the Private Subnet 2
+    Type: String
+    Default: 10.0.4.0/24
+
+  AvailabilityZone1:
+    Description: Availability Zone 1
+    Type: String
+    Default: us-east-1a
+
+  AvailabilityZone2:
+    Description: Availability Zone 2
+    Type: String
+    Default: us-east-1a
+
 Resources:
   EffulgenceTechVPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 10.0.0.0/16
+      CidrBlock: !Ref VpcCIDR
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags:
-       - Key: Name
-         Value: production
+        - Key: Name
+          Value: production
   
   EffulgencepubSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId: EffulgenceTechVPC
-      CidrBlock: 10.0.1.0/24
-      AvailabilityZone: "us-east-1a"
+      VpcId: !Ref EffulgenceTechVPC
+      CidrBlock: !Ref PublicSubnet1CIDR
+      AvailabilityZone: !Ref AvailabilityZone1
       Tags:
-      - Key: Name
-        Value: production
+        - Key: Stack
+          Value: production
   
   EffulgencepubSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId: EffulgenceTechVPC
-      CidrBlock: 10.0.2.0/24
-      AvailabilityZone: "us-east-1a"
+      VpcId: !Ref EffulgenceTechVPC
+      CidrBlock: !Ref PublicSubnet2CIDR
+      AvailabilityZone: !Ref AvailabilityZone2
       Tags:
-      - Key: Name
-        Value: production
+        - Key: Stack
+          Value: production
   
   EffulgenceprivSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId: EffulgenceTechVPC
-      CidrBlock: 10.0.3.0/24
-      AvailabilityZone: "us-east-1a"
+      VpcId: !Ref EffulgenceTechVPC
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      AvailabilityZone: !Ref AvailabilityZone1
       Tags:
-      - Key: Name
-        Value: production
+        - Key: Stack
+          Value: production
   
   EffulgenceprivSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId:  EffulgenceTechVPC
-      CidrBlock: 10.0.4.0/24
-      AvailabilityZone: "us-east-1a"
+      VpcId: !Ref EffulgenceTechVPC
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      AvailabilityZone: !Ref AvailabilityZone2
       Tags:
-      - Key: Name
-        Value: production
+        - Key: Stack
+          Value: production
   
   EffulgenceTechIGW:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
-      - Key: Name
-        Value: production                                
+        - Key: Stack
+          Value: production
   
   EffulgenceIGWAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      VpcId:
-        Ref: EffulgenceTechVPC
-      InternetGatewayId:
-        Ref: EffulgenceTechIGW
+      VpcId: !Ref EffulgenceTechVPC
+      InternetGatewayId: !Ref EffulgenceTechIGW
   
   Effulgencepub1SNRT:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId:  
-        Ref: EffulgenceTechVPC
+      VpcId: !Ref EffulgenceTechVPC
       Tags:
-      - Key: Name
-        Value: production
+        - Key: Name
+          Value: production
   
   Effulgencepub2SNRT:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId:  
-        Ref: EffulgenceTechVPC
+      VpcId: !Ref EffulgenceTechVPC
       Tags:
-      - Key: Name
-        Value: production
-
+        - Key: Stack
+          Value: production
+  
   Effulgencepriv1SNRT:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId:  
-        Ref: EffulgenceTechVPC
+      VpcId: !Ref EffulgenceTechVPC
       Tags:
-      - Key: Name
-        Value: production
+        - Key: Stack
+          Value: production
   
   Effulgencepriv2SNRT:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId:  
-        Ref: EffulgenceTechVPC
+      VpcId: !Ref EffulgenceTechVPC
       Tags:
-      - Key: Name
-        Value: production
+        - Key: Stack
+          Value: production
+  
+  Effulgencepub1SNRTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: EffulgencepubSubnet1
+      RouteTableId:
+        Ref: Effulgencepub1SNRT
+  
+  Effulgencepub2SNRTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: EffulgencepubSubnet2
+      RouteTableId:
+        Ref: Effulgencepub2SNRT        
 
+  Effulgencepriv1SNRTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: EffulgenceprivSubnet1
+      RouteTableId:
+        Ref: Effulgencepriv1SNRT
+
+  Effulgencepriv2SNRTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: EffulgenceprivSubnet2
+      RouteTableId:
+        Ref: Effulgencepriv2SNRT
+  
   PublicRoute1:
     Type: AWS::EC2::Route
-    DependsOn: GatewayToInternet
+    DependsOn: EffulgenceTechIGW
     Properties:
-       RouteTableId:
-         Ref: Effulgencepub1SNRT
-       DestinationCidrBlock: 0.0.0.0/0
-       GatewayId:
-         Ref: EffulgenceTechIGW
-
-PublicRoute2:
+      RouteTableId: !Ref Effulgencepub1SNRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref EffulgenceTechIGW
+  
+  PublicRoute2:
     Type: AWS::EC2::Route
-    DependsOn: GatewayToInternet
+    DependsOn: EffulgenceTechIGW
     Properties:
-       RouteTableId:
-         Ref: Effulgencepub2SNRT
-       DestinationCidrBlock: 0.0.0.0/0
-       GatewayId:
-         Ref: EffulgenceTechIGW
+      RouteTableId: !Ref Effulgencepub2SNRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref EffulgenceTechIGW
+
+Outputs:
+  VPCID:
+    Value: !Ref EffulgenceTechVPC
+    Description: VPC ID
+    Export:
+      Name: !Sub ${AWS::StackName}-EffulgenceTechVPC
+  
+  PublicSubnet1:
+    Value: !Ref EffulgencepubSubnet1
+    Description: Public Subnet 1
+    Export:
+      Name: !Sub ${AWS::StackName}-EffulgencepubSubnet1
+  
+  PublicSubnet2:
+    Value: !Ref EffulgencepubSubnet2
+    Description: Public Subnet 2
+    Export:
+      Name: !Sub ${AWS::StackName}-EffulgencepubSubnet2
+  
+  PrivateSubnet1:
+    Value: !Ref EffulgenceprivSubnet1
+    Description: Private Subnet 1
+    Export:
+      Name: !Sub ${AWS::StackName}-EffulgenceprivSubnet1
+  
+  PrivateSubnet2:
+    Value: !Ref EffulgenceprivSubnet2
+    Description: Private Subnet 2
+    Export:
+      Name: !Sub ${AWS::StackName}-EffulgenceprivSubnet2
+  
+  InternetGateway:
+    Value: !Ref EffulgenceTechIGW
+    Description: Internet Gateway
+    Export:
+      Name: !Sub ${AWS::StackName}-EffulgenceTechIGW
+  
+  PublicRouteTable1:
+    Value: !Ref Effulgencepub1SNRT
+    Description: Public Route Table 1
+    Export:
+      Name: !Sub ${AWS::StackName}-Effulgencepub1SNRT
+  
+  PublicRouteTable2:
+    Value: !Ref Effulgencepub2SNRT
+    Description: Public Route Table 2
+    Export:
+      Name: !Sub ${AWS::StackName}-Effulgencepub2SNRT
+  
+  PrivateRouteTable1:
+    Value: !Ref Effulgencepriv1SNRT
+    Description: Private Route Table 1
+    Export:
+      Name: !Sub ${AWS::StackName}-Effulgencepriv1SNRT
+  
+  PrivateRouteTable2:
+    Value: !Ref Effulgencepriv2SNRT
+    Description: Private Route Table 2
+    Export:
+      Name: !Sub ${AWS::StackName}-Effulgencepriv2SNRT
+  
+  PublicRouteTable1Association:
+    Value: !Ref Effulgencepub1SNRTAssociation
+    Description: Public Route Table 1 Association
+    Export:
+      Name: !Sub ${AWS::StackName}-Effulgencepub1SNRTAssociation
+  
+  PublicRouteTable2Association:
+    Value: !Ref Effulgencepub2SNRTAssociation
+    Description: Public Route Table 2 Association
+    Export:
+      Name: !Sub ${AWS::StackName}-ffulgencepub2SNRTAssociation
+  
+  PrivateRouteTable1Association:
+    Value: !Ref Effulgencepriv1SNRTAssociation
