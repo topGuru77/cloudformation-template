@@ -1,344 +1,248 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
-Description: >
-  This template creates the network resources for the EffulgenceTech 3-Tier architecture vpc.
+Description: |
+  This template creates the network resources for the EffulgenceTech 3-Tier architecture VPC with a NAT Gateway.
 
 Parameters:
   VpcCIDR:
     Description: CIDR for the VPC
     Type: String
-    Default: "Project-1VPC"
-  
+    Default: 10.0.0.0/16
+
   PublicSubnet1CIDR:
-    Description: CIDR for the Public Subnet 1
+    Description: CIDR for Public Subnet 1
     Type: String
-    Default: "45.16.0.0/16"
-  
+    Default: 10.0.1.0/24
+
   PublicSubnet2CIDR:
-    Description: CIDR for the Public Subnet 2
+    Description: CIDR for Public Subnet 2
     Type: String
-    Default: "45.16.32.0/19"
+    Default: 10.0.2.0/24
+
   PrivateSubnet1CIDR:
-    Description: CIDR for the Private Subnet 1
+    Description: CIDR for Private Subnet 1
     Type: String
-    Default: "45.16.64.0/19"
-  
+    Default: 10.0.3.0/24
+
   PrivateSubnet2CIDR:
-    Description: CIDR for the Private Subnet 2
+    Description: CIDR for Private Subnet 2
     Type: String
-    Default: "45.16.96.0/19"
-  
+    Default: 10.0.4.0/24
+
   AvailabilityZone1:
     Description: Availability Zone 1
     Type: String
     Default: us-east-1a
-  
+
   AvailabilityZone2:
     Description: Availability Zone 2
     Type: String
     Default: us-east-1b
-  
-  WebServerSecurityGroupDescription:
-    Description: Security Group for Web Server
-    Type: String
-    Default: "Enable HTTP"
-  
-  AppServerSecurityGroupDescription:
-    Description: Security Group for App Server
-    Type: String
-    Default: "Enable HTTP"
-  
-  DBServerSecurityGroupDescription:
-    Description: Security Group for DB Server
-    Type: String
-    Default: "Enable MySQL"      
 
-  Resources:
+Resources:
+  Project1VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 
-      EnableDnsSupport: 'true'
-      EnableDnsHostnames: 'true'
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
       Tags:
-       - Key: Name
-         Value: production
-    
-    PubSubnet1:
-     Type: AWS::EC2::Subnet
-     Properties:
-      VpcId: !Ref Project-1VPC
-      CidrBlock: 45.16.0.0/19
-      AvailabilityZone: "us-east-1a"
-      Tags:
-      - Key: stack
-        Value: production
-    
-    PubSubnet2:
-     Type: AWS::EC2::Subnet
-     Properties:
-      VpcId: !Ref Project-1VPC
-      CidrBlock: 
-      AvailabilityZone: "us-east-1b"
-      Tags:
-      - Key: stack
-        Value: production
-    
-    PrivSubnet1:
-     Type: AWS::EC2::Subnet
-     Properties:
-      VpcId: !Ref Project-1VPC
-      CidrBlock: 
-      AvailabilityZone: "us-east-1a"
-      Tags:
-      - Key: stack
-        Value: production
-    
-    PrivSubnet2:
-     Type: AWS::EC2::Subnet
-     Properties:
-      VpcId: !Ref Project-1VPC
-      CidrBlock: 
-      AvailabilityZone: "us-east-1b"
-      Tags:
-      - Key: stack
-        Value: production
-  
-  Project-1IGW:
+        - Key: Name
+          Value: production
+
+  Project1IGW:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
-      - Key: stack
-        Value: production
-  
-  Project-1NGW:
-   Type: AWS::EC2::NatGateway
-   Properties:
-      AllocationId: !GetAtt NATGatewayEIP.AllocationId
-      SubnetId: !Ref PubSubnet1
-      Tags:
-      - Key: stack
-        Value: production
-  
-  Project-1NGWEIP:
-   Type: AWS::EC2::EIP
-   Properties:
-      Domain: vpc
-  
-  Project-1NGWRoute:
-   Type: AWS::EC2::Route
-   Properties:
-      RouteTableId: !Ref PubSubnet1RT
-      DestinationCidrBlock: '0.0.0.0/0'
-      NatGatewayId: !Ref Project-1NGW
-  
-  PubSubnet1RT:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId:  
-        Ref: Project-1VPC
-      Tags:
-      - Key: stack
-        Value: production
-  
-  PubSubnet2RT:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId:  
-        Ref: Project-1VPC
-      Tags:
-      - Key: stack
-        Value: production
-  
-  PrivSubnet1RT:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId:  
-        Ref: Project-1VPC
-      Tags:
-      - Key: stack
-        Value: production
-  
-  PrivSubnet2RT:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId:  
-        Ref: Project-1VPC
-      Tags:
-      - Key: stack
-        Value: production
-  
-  PubSubnet1Route:
-    Type: AWS::EC2::Route
-    DependsOn: GatewayToInternet
-    Properties:
-       RouteTableId:
-         Ref: PubSubnet1RT
-       DestinationCidrBlock: 0.0.0.0/0
-       GatewayId:
-         Ref: Project-1IGW
-  
-  PubSubnet2Route:
-    Type: AWS::EC2::Route
-    DependsOn: GatewayToInternet
-    Properties:
-       RouteTableId:
-         Ref: PubSubnet1RT
-       DestinationCidrBlock: 0.0.0.0/0
-       GatewayId:
-         Ref: Project-1IGW
-  
-  PrivSubnet1Route:
-    Type: AWS::EC2::Route
-    DependsOn: GatewayToInternet
-    Properties:
-       RouteTableId:
-         Ref: PrivSubnet1RT
-       DestinationCidrBlock: 0.0.0.0/0
-       GatewayId:
-         Ref: Project-1NGW
-       Target:
-         Ref: Project-1NGW  
-  
-  PrivSubnet2Route:
-    Type: AWS::EC2::Route
-    DependsOn: GatewayToInternet
-    Properties:
-       RouteTableId:
-         Ref: PrivSubnet2RT
-       DestinationCidrBlock: 0.0.0.0/0
-       GatewayId:
-         Ref: Project-1NGW
-       Target:
-          Ref: Project-1NGW
-  
+        - Key: stack
+          Value: production
+
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      VpcId:
-        Ref: Project-1VPC
-      InternetGatewayId:
-        Ref: Project-1IGW
-  
-  Default Route:
+      VpcId: !Ref Project1VPC
+      InternetGatewayId: !Ref Project1IGW
+
+  # Public Subnets
+  PubSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Project1VPC
+      CidrBlock: !Ref PublicSubnet1CIDR
+      AvailabilityZone: !Ref AvailabilityZone1
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: stack
+          Value: production
+
+  PubSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Project1VPC
+      CidrBlock: !Ref PublicSubnet2CIDR
+      AvailabilityZone: !Ref AvailabilityZone2
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: stack
+          Value: production
+
+  # Private Subnets
+  PrivSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Project1VPC
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      AvailabilityZone: !Ref AvailabilityZone1
+      Tags:
+        - Key: stack
+          Value: production
+
+  PrivSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Project1VPC
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      AvailabilityZone: !Ref AvailabilityZone2
+      Tags:
+        - Key: stack
+          Value: production
+
+  # NAT Gateway
+  NATGatewayEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIP.AllocationId
+      SubnetId: !Ref PubSubnet1
+      Tags:
+        - Key: Name
+          Value: Project1-NATGateway
+
+  # Public Route Table
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Project1VPC
+      Tags:
+        - Key: stack
+          Value: production
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref Project1IGW
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PubSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PubSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  # Private Route Table
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Project1VPC
+      Tags:
+        - Key: stack
+          Value: production
+
+  PrivateRoute:
     Type: AWS::EC2::Route
     Properties:
-       RouteTableId:
-         Ref: PubSubnet1RT
-       DestinationCidrBlock:
-         Ref: AWS::EC2::VPC::CidrBlock
-  
-  PubSubnet1RTAssociation:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway
+
+  PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId:
-        Ref: PubSubnet1
-      RouteTableId:
-        Ref: PubSubnet1RT
-  
-  PubSubnet2RTAssociation:
+      SubnetId: !Ref PrivSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId:
-        Ref: PubSubnet2
-      RouteTableId:
-        Ref: PubSubnet2RT
-  
-  PrivSubnet1RTAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId:
-        Ref: PrivSubnet1
-      RouteTableId:
-        Ref: PrivSubnet1RT
-  
-  PrivSubnet2RTAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId:
-        Ref: PrivSubnet2
-      RouteTableId:
-        Ref: PrivSubnet2RT
-  
+      SubnetId: !Ref PrivSubnet2
+      RouteTableId: !Ref PrivateRouteTable
+
+  # Security Groups (added missing security groups)
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Enable HTTP access via port 80
-      SecurityGroupIngress:
-      - CidrIp:
-        IpProtocol: tcp
-        FromPort: '80''22''443'
-        ToPort: '80''22''443'
-  
+      GroupDescription: Web server security group
+      VpcId: !Ref Project1VPC
+
   AppServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Enable HTTP access via port 8080
-      SecurityGroupIngress:
-      - CidrIp:
-        IpProtocol: tcp
-        FromPort: '8080'
-        ToPort: '8080'
-  
+      GroupDescription: Application server security group
+      VpcId: !Ref Project1VPC
+
   DBServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Enable HTTP access via port 3306
-      SecurityGroupIngress:
-      - CidrIp:
-        IpProtocol: tcp
-        FromPort: '3306'
-        ToPort: '3306'
+      GroupDescription: Database server security group
+      VpcId: !Ref Project1VPC
 
-  Outputs:
-    VPCID:
-      Value: !Ref Project-1VPC
-      Description: VPC ID
-      Export:
-        Name: !Sub ${AWS::StackName}-VPCID
-    
-    PubSubnet1ID:
-      Value: !Ref PubSubnet1
-      Description: Public Subnet 1 ID
-      Export:
-        Name: !Sub ${AWS::StackName}-PubSubnet1ID
-    
-    PubSubnet2ID:
-      Value: !Ref PubSubnet2
-      Description: Public Subnet 2 ID
-      Export:
-        Name: !Sub ${AWS::StackName}-PubSubnet2ID
-    
-    PrivSubnet1ID:
-      Value: !Ref PrivSubnet1
-      Description: Private Subnet 1 ID
-      Export:
-        Name: !Sub ${AWS::StackName}-PrivSubnet1ID
-    
-    PrivSubnet2ID:
-      Value: !Ref PrivSubnet2
-      Description: Private Subnet 2 ID
-      Export:
-        Name: !Sub ${AWS::StackName}-PrivSubnet2ID
-    
-    WebServerSecurityGroupID:
-      Value: !Ref WebServerSecurityGroup
-      Description: Web Server Security Group
-      Export:
-        Name: !Sub ${AWS::StackName}-WebServerSecurityGroup
-    
-    AppServerSecurityGroupID:
-      Value: !Ref AppServerSecurityGroup
-      Description: App Server Security Group
-      Export:
-        Name: !Sub ${AWS::StackName}-AppServerSecurityGroup
-    
-    DBServerSecurityGroupID:
-      Value: !Ref DBServerSecurityGroup
-      Description: DB Server Security Group
-      Export:
-        Name: !Sub ${AWS::StackName}-DBServerSecurityGroup
-                                                                         
-         
+Outputs:
+  VPCId:
+    Description: VPC ID
+    Value: !Ref Project1VPC
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCId"
 
-                       
+  PublicSubnet1Id:
+    Description: Public Subnet 1 ID
+    Value: !Ref PubSubnet1
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicSubnet1Id"
 
+  PublicSubnet2Id:
+    Description: Public Subnet 2 ID
+    Value: !Ref PubSubnet2
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicSubnet2Id"
+
+  PrivateSubnet1Id:
+    Description: Private Subnet 1 ID
+    Value: !Ref PrivSubnet1
+    Export:
+      Name: !Sub "${AWS::StackName}-PrivateSubnet1Id"
+
+  PrivateSubnet2Id:
+    Description: Private Subnet 2 ID
+    Value: !Ref PrivSubnet2
+    Export:
+      Name: !Sub "${AWS::StackName}-PrivateSubnet2Id"
+
+  WebServerSecurityGroupId:
+    Description: Web Server Security Group ID
+    Value: !Ref WebServerSecurityGroup
+    Export:
+      Name: !Sub "${AWS::StackName}-WebServerSecurityGroupId"
+
+  AppServerSecurityGroupId:
+    Description: App Server Security Group ID
+    Value: !Ref AppServerSecurityGroup
+    Export:
+      Name: !Sub "${AWS::StackName}-AppServerSecurityGroupId"
+
+  DatabaseSecurityGroupId:
+    Description: Database Security Group ID
+    Value: !Ref DBServerSecurityGroup
+    Export:
+      Name: !Sub "${AWS::StackName}-DatabaseSecurityGroupId"
