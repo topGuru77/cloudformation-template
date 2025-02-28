@@ -1,8 +1,9 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
 Parameters:
   VpcId:
     Description: VPC ID
     Type: AWS::EC2::VPC::Id
-    Default: Project1VPC
 
   EC2InstanceType:
     Description: EC2 Instance Type
@@ -22,27 +23,26 @@ Parameters:
   Pub1SubnetId:
     Description: Public Subnet 1 ID
     Type: AWS::EC2::Subnet::Id
-    Default: PubSubnet1
 
   Pub2SubnetId:
     Description: Public Subnet 2 ID
     Type: AWS::EC2::Subnet::Id
-    Default: PubSubnet2
 
   Priv1SubnetId:
     Description: Private Subnet 1 ID
     Type: AWS::EC2::Subnet::Id
-    Default: PrivSubnet1
 
   Priv2SubnetId:
     Description: Private Subnet 2 ID
     Type: AWS::EC2::Subnet::Id
-    Default: PrivSubnet2   
 
   WebServerSecurityGroup:
     Description: Security Group ID for Web Server
     Type: AWS::EC2::SecurityGroup::Id
-    Default: ""
+
+  AppServerSecurityGroup:
+    Description: Security Group ID for App Server
+    Type: AWS::EC2::SecurityGroup::Id
 
 Resources:
   WebserverEC2:
@@ -53,7 +53,7 @@ Resources:
       ImageId: !Ref ImageId
       SubnetId: !Ref Pub1SubnetId
       SecurityGroupIds:
-        - !ImportValue WebServerSecurityGroup
+        - !Ref WebServerSecurityGroup
       Tags:
         - Key: Name
           Value: WebserverEC2
@@ -68,7 +68,7 @@ Resources:
       ImageId: !Ref ImageId
       SubnetId: !Ref Priv1SubnetId
       SecurityGroupIds:
-        - !ImportValue AppServerSecurityGroup
+        - !Ref AppServerSecurityGroup
       Tags:
         - Key: Name
           Value: AppserverEC2
@@ -83,7 +83,7 @@ Resources:
         - !Ref Pub1SubnetId
         - !Ref Pub2SubnetId
       SecurityGroups:
-        - !ImportValue WebServerSecurityGroup
+        - !Ref WebServerSecurityGroup
       Tags:
         - Key: Name
           Value: ApplicationLB
@@ -112,7 +112,7 @@ Resources:
           TargetGroupArn: !Ref TargetGroup
       LoadBalancerArn: !Ref ApplicationLoadBalancer
       Port: 80
-      Protocol: HTTP 
+      Protocol: HTTP
 
 Outputs:
   WebserverEC2:
