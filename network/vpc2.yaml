@@ -182,6 +182,20 @@ Resources:
       RouteTableId: !Ref Effulgencepub2SNRT
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref EffulgenceTechIGW
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access via port 80
+      VpcId: !Ref EffulgenceTechVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0        
 
 Outputs:
   VPCID:
@@ -258,3 +272,13 @@ Outputs:
   
   PrivateRouteTable1Association:
     Value: !Ref Effulgencepriv1SNRTAssociation
+    Description: Private Route Table 1 Association
+    Export:
+      Name: !Sub ${AWS::StackName}-Effulgencepriv1SNRTAssociation
+  
+  SecurityGroupID:
+    Value: !Ref SecurityGroup
+    Description: Security Group ID
+    Export:
+      Name: !Sub ${AWS::StackName}-SecurityGroup
+          
