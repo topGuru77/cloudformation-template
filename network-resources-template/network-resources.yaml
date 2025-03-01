@@ -179,7 +179,11 @@ Resources:
       SubnetId: !Ref PrivSubnet2
       RouteTableId: !Ref PrivateRouteTable
 
+<<<<<<< HEAD
+  # Security Groups (added missing sec
+=======
   # Security Groups 
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -246,3 +250,21 @@ Outputs:
     Value: !Ref DBServerSecurityGroup
     Export:
       Name: !Sub "${AWS::StackName}-DatabaseSecurityGroupId"
+  
+  InternetGatewayId:
+    Description: Internet Gateway ID
+    Value: !Ref Project1IGW
+    Export:
+      Name: !Sub "${AWS::StackName}-InternetGatewayId"
+  
+  InternetGatewayAttachmentId:
+    Description: Internet Gateway Attachment ID
+    Value: !Ref InternetGatewayAttachment
+    Export:
+      Name: !Sub "${AWS::StackName}-InternetGatewayAttachmentId"
+  
+  NatGatewayId:
+    Description: Nat Gateway ID
+    Value: !Ref NATGateway
+    Export:
+      Name: !Sub "${AWS::StackName}-NatGatewayId"            

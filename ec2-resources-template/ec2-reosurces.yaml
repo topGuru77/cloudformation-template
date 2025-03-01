@@ -1,20 +1,64 @@
+<<<<<<< HEAD
+AWSTemplateFormatVersion: '2010-09-09'
+
+=======
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
 Parameters:
   VpcId:
     Description: VPC ID
     Type: AWS::EC2::VPC::Id
+<<<<<<< HEAD
+
+=======
     Default: Project1VPC
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
   EC2InstanceType:
     Description: EC2 Instance Type
     Type: String
     Default: t2.micro
+<<<<<<< HEAD
+
+=======
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: AWS::EC2::KeyPair::KeyName
     Default: Pekay-keys
+<<<<<<< HEAD
+
+=======
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
   ImageId:
     Description: Image ID
     Type: AWS::EC2::Image::Id
     Default: ami-02a53b0d62d37a757
+<<<<<<< HEAD
+
+  Pub1SubnetId:
+    Description: Public Subnet 1 ID
+    Type: AWS::EC2::Subnet::Id
+
+  Pub2SubnetId:
+    Description: Public Subnet 2 ID
+    Type: AWS::EC2::Subnet::Id
+
+  Priv1SubnetId:
+    Description: Private Subnet 1 ID
+    Type: AWS::EC2::Subnet::Id
+
+  Priv2SubnetId:
+    Description: Private Subnet 2 ID
+    Type: AWS::EC2::Subnet::Id
+
+  WebServerSecurityGroup:
+    Description: Security Group ID for Web Server
+    Type: AWS::EC2::SecurityGroup::Id
+
+  AppServerSecurityGroup:
+    Description: Security Group ID for App Server
+    Type: AWS::EC2::SecurityGroup::
+  
+=======
   Pub1SubnetId:
     Description: Subnet ID
     Type: AWS::EC2::Subnet::Id
@@ -36,6 +80,7 @@ Parameters:
     Type: AWS::EC2::SecurityGroup::Id
     Default:     
 
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
 Resources:
   WebserverEC2:
     Type: AWS::EC2::Instance
@@ -44,14 +89,23 @@ Resources:
       KeyName: !Ref KeyName
       ImageId: !Ref ImageId
       SubnetId: !Ref Pub1SubnetId
+<<<<<<< HEAD
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+=======
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
       Tags:
         - Key: Name
           Value: WebserverEC2
         - Key: Stack
           Value: production
+<<<<<<< HEAD
+
+=======
       SecurityGroupIds:
        -!ImportValue WebServerSecurityGroup
   
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
   AppserverEC2:
     Type: AWS::EC2::Instance
     Properties:
@@ -59,11 +113,23 @@ Resources:
       KeyName: !Ref KeyName
       ImageId: !Ref ImageId
       SubnetId: !Ref Priv1SubnetId
+<<<<<<< HEAD
+      SecurityGroupIds:
+        - !Ref AppServerSecurityGroup
+=======
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
       Tags:
         - Key: Name
           Value: AppserverEC2
         - Key: Stack
           Value: production
+<<<<<<< HEAD
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: ApplicationLoadBalancer
+=======
       SecurityGroupIds:
        -!ImportValue AppServerSecurityGroup
   
@@ -71,17 +137,26 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Name: Application Load Balancer
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
       Subnets:
         - !Ref Pub1SubnetId
         - !Ref Pub2SubnetId
       SecurityGroups:
+<<<<<<< HEAD
+        - !Ref WebServerSecurityGroup
+=======
         - !ImportValue WebServerSecurityGroup
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
       Tags:
         - Key: Name
           Value: ApplicationLB
         - Key: Stack
           Value: production
+<<<<<<< HEAD
+
+=======
   
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -95,13 +170,47 @@ Resources:
           Value: TargetGroup
         - Key: Stack
           Value: production
+<<<<<<< HEAD
+
+=======
   
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
+<<<<<<< HEAD
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+Outputs:
+  WebserverEC2:
+    Description: Webserver EC2 Instance ID
+    Value: !Ref WebserverEC2
+    Export:
+      Name: !Sub "${AWS::StackName}-WebserverEC2"
+
+  AppserverEC2:
+    Description: Appserver EC2 Instance ID
+    Value: !Ref AppserverEC2
+    Export:
+      Name: !Sub "${AWS::StackName}-AppserverEC2"
+
+  ApplicationLoadBalancer:
+    Description: Application Load Balancer ID
+    Value: !Ref ApplicationLoadBalancer
+    Export:
+      Name: !Sub "${AWS::StackName}-ApplicationLoadBalancer"
+
+  LoadBalancerDNSName:
+    Description: Application Load Balancer DNS Name
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: !Sub "${AWS::StackName}-ApplicationLoadBalancerDNSName"
+=======
       LoadBalancerArn: !Ref Application Load Balancer
       Port: 80
       Protocol: HTTP 
@@ -135,3 +244,4 @@ Resources:
 
 
         
+>>>>>>> 44c7a48607ec2b6004e18f9e465e314e1ef71529

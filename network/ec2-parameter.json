@@ -1,0 +1,14 @@
+[
+    {
+      "ParameterKey": "CreateInstance",
+      "ParameterValue": "true"
+    },
+    {
+      "ParameterKey": "InstanceType",
+      "ParameterValue": "t2.micro"
+    },
+    {
+      "ParameterKey": "KeyName",
+      "ParameterValue": "Pekay-keys"
+    }
+  ]
