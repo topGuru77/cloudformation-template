@@ -1,0 +1,57 @@
+Description: This template creates the database resources for the application.
+
+Parameters:
+  DBName:
+    Description: Name of the database
+    Type: String
+    Default: project1db
+  
+  DBUsername:
+    Description: Username for the database
+    Type: String
+    Default: admin
+  
+  DBPassword:
+    Description: Password for the database
+    Type: String
+    NoEcho: true
+  
+  DBSecurityGroup:
+    Description: Security Group ID for the RDS DB instance
+    Type: AWS::EC2::SecurityGroup::Id
+    Default: ""
+  
+  DBSubnetGroup:
+    Description: Subnet group for the RDS DB instance
+    Type: AWS::RDS::DBSubnetGroup::Name
+    Default: project1dbsubnetgroup
+
+Resources:
+  RDSDBInstance:
+   Type: AWS::RDS::DBInstance
+   Properties:
+    AllocatedStorage: 20
+    DBInstanceClass: db.t2.micro
+    Engine: mysql
+    EngineVersion: 5.7
+    MasterUsername: !Ref DBUsername
+    MasterUserPassword: !Ref DBPassword
+    DBName: !Ref DBName
+    MultiAZ: false
+    PubliclyAccessible: false
+    StorageType: gp2
+    VPCSecurityGroups:
+      - !ImportValue DBSecurityGroup
+    DBSubnetGroupName: !Ref DBSubnetGroup
+  
+  DBSubnetgroup:
+   Type: AWS::RDS::DBSubnetGroup
+   Properties:
+    DBSubnetGroupDescription: Subnet group for the RDS DB instance
+    SubnetIds:
+      - !ImportValue PrivSubnet1
+      - !ImportValue PrivSubnet2
+    Tags:
+      - Key: Name
+        Value: production
+  
